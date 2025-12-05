@@ -264,7 +264,7 @@
             <div class="text-center">
                 <h1 class="text-4xl font-bold mb-2">🌟 نظام رصد السلوك المميز 🌟</h1>
 إدارة وتوثيق السلوكيات المميزة للطلاب - وفق قواعد السلوك والمواظبة 1447هـ
-<span id="appVersionBadge" style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 10px;">v1.0.6</span>
+<span id="appVersionBadge" style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 10px;">v1.0.4</span>
                 <div class="mt-3 flex justify-center gap-4">
                     <button onclick="showInfographicModal()" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-all flex items-center gap-2">
                         <span>📊</span>
@@ -4363,11 +4363,41 @@ function printFilteredPeriod() {
     animation: toastSlideIn 0.3s;
 }
 
+
+
 @keyframes toastSlideIn {
     from { transform: translateX(100px); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
 
+
+/* خلفية مظللة خلف النافذة */
+.update-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999998;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes updatePopIn {
+    from { 
+        transform: translate(-50%, -50%) scale(0.8); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translate(-50%, -50%) scale(1); 
+        opacity: 1; 
+    }
+}
 
 /* ═══════════════════════════════════════════════ */
 /* تنسيق خيارات الاستعادة                          */
@@ -4456,8 +4486,8 @@ function printFilteredPeriod() {
 //                    نظام التحديث التلقائي
 // ═══════════════════════════════════════════════════════════════
 
-const CURRENT_APP_VERSION = "1.0.5";
-const VERSION_FILE_URL = "https://goldenveinshq.github.io/alsuluk_almumayaz/version.json";
+const CURRENT_APP_VERSION = "1.0.3";
+const VERSION_FILE_URL = "https://goldenveinshq.github.io/alsuluk_almumayaz/";
 const UPDATE_CHECK_INTERVAL = 3 * 60 * 1000;
 
 let updateCheckInProgress = false;
@@ -4501,27 +4531,75 @@ function isNewerVersion(newVer, currentVer) {
 }
 
 function showUpdateNotification(updateInfo) {
+    // إزالة أي نافذة قديمة
     const old = document.querySelector('.update-notification');
     if (old) old.remove();
     
+    const oldBackdrop = document.querySelector('.update-backdrop');
+    if (oldBackdrop) oldBackdrop.remove();
+    
     let featuresHTML = '';
     if (updateInfo.features && updateInfo.features.length > 0) {
-        featuresHTML = `<div class="features-list"><strong>✨ الجديد:</strong><br>${updateInfo.features.map(f => '• ' + f).join('<br>')}</div>`;
+        featuresHTML = `<div class="features-list" style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; text-align: right;"><strong>✨ الجديد:</strong><br>${updateInfo.features.map(f => '• ' + f).join('<br>')}</div>`;
     }
     
+    // إنشاء الخلفية المظللة
+    const backdrop = document.createElement('div');
+    backdrop.className = 'update-backdrop';
+    backdrop.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999998;
+        animation: fadeIn 0.3s;
+    `;
+    document.body.appendChild(backdrop);
+    
+    // إنشاء نافذة التحديث
     const notification = document.createElement('div');
     notification.className = 'update-notification';
+    
+    // إضافة Inline Styles للتأكد من التطبيق
+    notification.style.cssText = `
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        padding: 20px 30px !important;
+        border-radius: 15px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+        z-index: 999999 !important;
+        text-align: center !important;
+        min-width: 350px !important;
+        max-width: 90% !important;
+        animation: updatePopIn 0.4s ease-out !important;
+        direction: rtl !important;
+        font-family: 'Tajawal', sans-serif !important;
+    `;
+    
     notification.innerHTML = `
-        <h3>🎉 يوجد تحديث جديد!</h3>
-        <div class="version-info">الحالية: <strong>v${CURRENT_APP_VERSION}</strong> ← الجديدة: <strong>v${updateInfo.version}</strong></div>
-        <p>${updateInfo.message || 'تحديثات وتحسينات جديدة'}</p>
+        <h3 style="margin: 0 0 10px 0; font-size: 20px;">🎉 يوجد تحديث جديد!</h3>
+        <div class="version-info" style="background: rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 5px; font-size: 13px; margin-bottom: 15px;">
+            الحالية: <strong>v${CURRENT_APP_VERSION}</strong> ← الجديدة: <strong>v${updateInfo.version}</strong>
+        </div>
+        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">${updateInfo.message || 'تحديثات وتحسينات جديدة'}</p>
         ${featuresHTML}
         <div>
-            <button onclick="applyUpdate()">🔄 تحديث الآن</button>
-            <button class="later-btn" onclick="dismissUpdate()">⏰ لاحقاً</button>
+            <button id="updateNowBtn" style="background: white; color: #667eea; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin: 0 5px; transition: all 0.3s;">🔄 تحديث الآن</button>
+            <button id="updateLaterBtn" style="background: transparent; color: white; border: 2px solid white; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin: 0 5px; transition: all 0.3s;">⏰ لاحقاً</button>
         </div>
     `;
+    
     document.body.appendChild(notification);
+    
+    // ربط الأزرار بعد إضافة العنصر للصفحة
+    document.getElementById('updateNowBtn').addEventListener('click', applyUpdate);
+    document.getElementById('updateLaterBtn').addEventListener('click', dismissUpdate);
 }
 
 function applyUpdate() {
@@ -4536,10 +4614,22 @@ function applyUpdate() {
 
 function dismissUpdate() {
     const notification = document.querySelector('.update-notification');
+    const backdrop = document.querySelector('.update-backdrop');
+    
     if (notification) {
-        notification.style.animation = 'updateSlideDown 0.3s reverse';
+        notification.style.opacity = '0';
+        notification.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        notification.style.transition = 'all 0.3s';
         setTimeout(() => notification.remove(), 300);
     }
+    
+    if (backdrop) {
+        backdrop.style.opacity = '0';
+        backdrop.style.transition = 'opacity 0.3s';
+        setTimeout(() => backdrop.remove(), 300);
+    }
+    
+    // إعادة الفحص بعد 10 دقائق
     setTimeout(() => checkForUpdates(false), 10 * 60 * 1000);
 }
 
@@ -4586,6 +4676,3 @@ function closePrivacyModal() {
     </script>
 </body>
 </html>
-
-
-
